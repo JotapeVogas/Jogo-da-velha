@@ -1,0 +1,50 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #770707;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 10px;
+}
+
+.cell {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    background-color: #006800;
+    border: 1px solid #ffffff;
+    cursor: pointer;
+    margin-bottom: 5px;
+}
+
+.cell:hover {
+    background-color: #4c99ff;
+}
+
+.hidden {
+    display: none;
+}
+
+#message {
+    margin: 20px 0;
+}
+
+button{
+    margin-top: 10px;
+}
