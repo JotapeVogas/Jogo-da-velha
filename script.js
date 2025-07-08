@@ -1,158 +1,110 @@
-const cells = document.querySelectorAll('.cell');
-const message = document.getElementById('message');
-const resetButton = document.getElementById('reset');
-const playAIButton = document.getElementById('playAI');
+const celulas = document.querySelectorAll('.celula');
+const mensagem = document.getElementById('mensagem');
+const botaoReiniciar = document.getElementById('reiniciar');
+const botaoJogarIA = document.getElementById('jogarIA');
 
-let board = ['', '', '', '', '', '', '', '', ''];
-let currentPlayer = 'X';
-let isGameActive = true;
-let againstAI = false;
+let tabuleiro = ['', '', '', '', '', '', '', '', ''];
+let jogadorAtual = 'X';
+let jogoAtivo = true;
+let contraIA = false;
 
-const winningConditions = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
+// Combinações vencedoras
+const COMBINACOES_VENCEDORAS = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], // linhas
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], // colunas
+    [0, 4, 8], [2, 4, 6]             // diagonais
 ];
 
-function handleCellClick(e) {
-    const cell = e.target;
-    const index = cell.getAttribute('data-index');
+celulas.forEach(celula => celula.addEventListener('click', jogar));
+botaoReiniciar.addEventListener('click', reiniciarJogo);
+botaoJogarIA.addEventListener('click', alternarModoIA);
 
-    if (board[index] !== '' || !isGameActive) {
-        return;
-    }
+// Função principal do jogo
+function jogar(evento) {
+    const celulaClicada = evento.target;
+    const indice = celulaClicada.getAttribute('data-indice');
 
-    board[index] = currentPlayer;
-    cell.textContent = currentPlayer;
+    // Verifica se a jogada é válida
+    if (tabuleiro[indice] !== '' || !jogoAtivo) return;
 
-    checkResult();
-    if (isGameActive && againstAI && currentPlayer === 'O') {
-        aiMove();
+    // Faz a jogada do humano
+    tabuleiro[indice] = jogadorAtual;
+    celulaClicada.textContent = jogadorAtual;
+    
+    // Verifica se houve vencedor
+    verificarVencedor();
+    
+    // Se estiver jogando contra IA e o jogo não terminou
+    if (jogoAtivo && contraIA) {
+        jogadorAtual = 'O'; // Passa a vez para a IA
+        setTimeout(jogadaIA, 500); // Delay para parecer mais natural
+    } else if (jogoAtivo) {
+        // Alterna jogador no modo multiplayer
+        jogadorAtual = jogadorAtual === 'X' ? 'O' : 'X';
+        mensagem.textContent = `Vez do Jogador ${jogadorAtual}`;
     }
 }
 
-function checkResult() {
-    let roundWon = false;
-
-    for (let i = 0; i < winningConditions.length; i++) {
-        const [a, b, c] = winningConditions[i];
-        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-            roundWon = true;
-            break;
+// Jogada da IA (simplificada)
+function jogadaIA() {
+    // Encontra uma jogada vazia aleatória
+    const jogadasVazias = [];
+    for (let i = 0; i < tabuleiro.length; i++) {
+        if (tabuleiro[i] === '') jogadasVazias.push(i);
+    }
+    
+    if (jogadasVazias.length > 0) {
+        const indiceAleatorio = Math.floor(Math.random() * jogadasVazias.length);
+        const melhorJogada = jogadasVazias[indiceAleatorio];
+        
+        // Faz a jogada da IA
+        tabuleiro[melhorJogada] = 'O';
+        celulas[melhorJogada].textContent = 'O';
+        
+        // Verifica se houve vencedor
+        verificarVencedor();
+        
+        if (jogoAtivo) {
+            jogadorAtual = 'X'; // Volta a vez para o jogador humano
+            mensagem.textContent = 'Sua vez (X)';
         }
     }
-
-    if (roundWon) {
-        message.textContent = `Player ${currentPlayer} Wins!`;
-        isGameActive = false;
-        return;
-    }
-
-    if (!board.includes('')) {
-        message.textContent = 'Draw!';
-        isGameActive = false;
-        return;
-    }
-
-    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
 }
 
-function aiMove() {
-    let bestMove = getBestMove();
-    if (bestMove !== null) {
-        board[bestMove] = currentPlayer;
-        cells[bestMove].textContent = currentPlayer;
-        checkResult();
-    }
-}
-
-function getBestMove() {
-    let bestScore = -Infinity;
-    let move;
-
-    for (let i = 0; i < board.length; i++) {
-        if (board[i] === '') {
-            board[i] = currentPlayer;
-            let score = minimax(board, 0, false);
-            board[i] = '';
-            if (score > bestScore) {
-                bestScore = score;
-                move = i;
-            }
+// Verifica se há vencedor
+function verificarVencedor() {
+    // Verifica combinações vencedoras
+    for (let combinacao of COMBINACOES_VENCEDORAS) {
+        const [a, b, c] = combinacao;
+        if (tabuleiro[a] && tabuleiro[a] === tabuleiro[b] && tabuleiro[a] === tabuleiro[c]) {
+            mensagem.textContent = `Jogador ${tabuleiro[a]} Venceu!`;
+            jogoAtivo = false;
+            return;
         }
     }
-    return move;
-}
-
-function minimax(board, depth, isMaximizing) {
-    let scores = {
-        'X': -1,
-        'O': 1,
-        'draw': 0
-    };
-
-    let result = checkWinner();
-    if (result !== null) {
-        return scores[result];
-    }
-
-    if (isMaximizing) {
-        let bestScore = -Infinity;
-        for (let i = 0; i < board.length; i++) {
-            if (board[i] === '') {
-                board[i] = 'O';
-                let score = minimax(board, depth + 1, false);
-                board[i] = '';
-                bestScore = Math.max(score, bestScore);
-            }
-        }
-        return bestScore;
-    } else {
-        let bestScore = Infinity;
-        for (let i = 0; i < board.length; i++) {
-            if (board[i] === '') {
-                board[i] = 'X';
-                let score = minimax(board, depth + 1, true);
-                board[i] = '';
-                bestScore = Math.min(score, bestScore);
-            }
-        }
-        return bestScore;
+    
+    // Verifica empate
+    if (!tabuleiro.includes('')) {
+        mensagem.textContent = 'Empate!';
+        jogoAtivo = false;
     }
 }
 
-function checkWinner() {
-    for (let i = 0; i < winningConditions.length; i++) {
-        const [a, b, c] = winningConditions[i];
-        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-            return board[a];
-        }
-    }
-
-    if (!board.includes('')) {
-        return 'draw';
-    }
-
-    return null;
+// Reinicia o jogo
+function reiniciarJogo() {
+    tabuleiro = ['', '', '', '', '', '', '', '', ''];
+    jogadorAtual = 'X';
+    jogoAtivo = true;
+    mensagem.textContent = contraIA ? 'Sua vez (X)' : `Vez do Jogador ${jogadorAtual}`;
+    celulas.forEach(celula => celula.textContent = '');
 }
 
-function resetGame() {
-    board = ['', '', '', '', '', '', '', '', ''];
-    isGameActive = true;
-    currentPlayer = 'X';
-    message.textContent = '';
-    cells.forEach(cell => cell.textContent = '');
+// Alterna entre jogar contra IA ou humano
+function alternarModoIA() {
+    contraIA = !contraIA;
+    botaoJogarIA.textContent = contraIA ? 'Jogar Contra Humano' : 'Jogar Contra IA';
+    reiniciarJogo();
 }
 
-cells.forEach(cell => cell.addEventListener('click', handleCellClick));
-resetButton.addEventListener('click', resetGame);
-playAIButton.addEventListener('click', () => {
-    againstAI = !againstAI;
-    playAIButton.textContent = againstAI ? 'Play Against Human' : 'Play Against AI';
-    resetGame();
-});
+// Inicia o jogo
+reiniciarJogo();

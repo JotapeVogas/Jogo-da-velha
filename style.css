@@ -1,50 +1,67 @@
 body {
+    font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    font-family: Arial, sans-serif;
-    background-color: #770707;
+    margin: 0;
+    background-color: #7a0000;
+    color: #ffffff;
 }
 
 .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    text-align: center;
+    background:#065206;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgb(255, 255, 255);
 }
 
-.board {
+h1 {
+    color: #ffffff;
+}
+
+.tabuleiro {
     display: grid;
     grid-template-columns: repeat(3, 100px);
     grid-template-rows: repeat(3, 100px);
-    gap: 10px;
+    gap: 5px;
+    margin: 20px auto;
 }
 
-.cell {
+.celula {
     width: 100px;
     height: 100px;
+    background: #7a0000;
+    border: 2px solid #ffffff;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2em;
-    background-color: #006800;
-    border: 1px solid #ffffff;
+    font-size: 2.5em;
     cursor: pointer;
-    margin-bottom: 5px;
 }
 
-.cell:hover {
-    background-color: #4c99ff;
+.celula:hover {
+    background-color: #065206;
 }
 
-.hidden {
-    display: none;
+#mensagem {
+    margin: 15px 0;
+    font-size: 1.2em;
+    font-weight: bold;
+    height: 24px;
 }
 
-#message {
-    margin: 20px 0;
+button {
+    padding: 10px 20px;
+    font-size: 1em;
+    background: #065206;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
-button{
-    margin-top: 10px;
+button:hover {
+    background: #7a0000;
 }
